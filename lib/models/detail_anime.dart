@@ -1,37 +1,31 @@
 // To parse this JSON data, do
 //
-//     final seasonNow = seasonNowFromJson(jsonString);
-
-// ignore_for_file: prefer_if_null_operators
+//     final detailAnime = detailAnimeFromJson(jsonString);
 
 import 'dart:convert';
 
-SeasonNow seasonNowFromJson(String str) => SeasonNow.fromJson(json.decode(str));
+DetailAnime detailAnimeFromJson(String str) => DetailAnime.fromJson(json.decode(str));
 
-String seasonNowToJson(SeasonNow data) => json.encode(data.toJson());
+String detailAnimeToJson(DetailAnime data) => json.encode(data.toJson());
 
-class SeasonNow {
-    SeasonNow({
-        required this.pagination,
-        required this.data,
+class DetailAnime {
+    DetailAnime({
+        this.data,
     });
 
-    Pagination pagination;
-    List<Datum> data;
+    Data? data;
 
-    factory SeasonNow.fromJson(Map<String, dynamic> json) => SeasonNow(
-        pagination: Pagination.fromJson(json["pagination"]),
-        data: List<Datum>.from(json["data"].map((x) => Datum.fromJson(x))),
+    factory DetailAnime.fromJson(Map<String, dynamic> json) => DetailAnime(
+        data: Data.fromJson(json["data"]),
     );
 
     Map<String, dynamic> toJson() => {
-        "pagination": pagination.toJson(),
-        "data": List<dynamic>.from(data.map((x) => x.toJson())),
+        "data": data!.toJson(),
     };
 }
 
-class Datum {
-    Datum({
+class Data {
+    Data({
         required this.malId,
         required this.url,
         required this.images,
@@ -95,9 +89,9 @@ class Datum {
     int members;
     int favorites;
     String synopsis;
-    String background;
-    String? season;
-    int? year;
+    dynamic background;
+    String season;
+    int year;
     Broadcast broadcast;
     List<Demographic> producers;
     List<Demographic> licensors;
@@ -107,7 +101,7 @@ class Datum {
     List<Demographic> themes;
     List<Demographic> demographics;
 
-    factory Datum.fromJson(Map<String, dynamic> json) => Datum(
+    factory Data.fromJson(Map<String, dynamic> json) => Data(
         malId: json["mal_id"],
         url: json["url"],
         images: Map.from(json["images"]).map((k, v) => MapEntry<String, Img>(k, Img.fromJson(v))),
@@ -115,27 +109,27 @@ class Datum {
         approved: json["approved"],
         titles: List<Title>.from(json["titles"].map((x) => Title.fromJson(x))),
         title: json["title"],
-        titleEnglish: json["title_english"] == null ? "null" : json["title_english"],
-        titleJapanese: json["title_japanese"],
+        titleEnglish: json["title_english"] ?? "null",
+        titleJapanese: json["title_japanese"] ?? "null",
         titleSynonyms: List<String>.from(json["title_synonyms"].map((x) => x)),
         type: json["type"],
         source: json["source"],
-        episodes: json["episodes"] == null ? 0 : json["episodes"],
+        episodes: json["episodes"] ?? 0,
         status: json["status"],
         airing: json["airing"],
         aired: Aired.fromJson(json["aired"]),
         duration: json["duration"],
         rating: json["rating"],
-        score: json["score"] == null ? 0 : json["score"].toDouble(),
-        scoredBy: json["scored_by"] == null ? 0 : json["scored_by"],
-        rank: json["rank"] == null ? 0 : json["rank"],
+        score: json["score"].toDouble(),
+        scoredBy: json["scored_by"],
+        rank: json["rank"],
         popularity: json["popularity"],
         members: json["members"],
         favorites: json["favorites"],
         synopsis: json["synopsis"],
-        background: json["background"] == null ? "null" : json["background"],
-        season: json["season"] == null ? "null" : json["season"],
-        year: json["year"] == null ? 0 : json["year"],
+        background: json["background"],
+        season: json["season"] ?? "null",
+        year: json["year"] ?? 0,
         broadcast: Broadcast.fromJson(json["broadcast"]),
         producers: List<Demographic>.from(json["producers"].map((x) => Demographic.fromJson(x))),
         licensors: List<Demographic>.from(json["licensors"].map((x) => Demographic.fromJson(x))),
@@ -154,25 +148,25 @@ class Datum {
         "approved": approved,
         "titles": List<dynamic>.from(titles.map((x) => x.toJson())),
         "title": title,
-        "title_english": titleEnglish == null ? "null" : titleEnglish,
+        "title_english": titleEnglish,
         "title_japanese": titleJapanese,
         "title_synonyms": List<dynamic>.from(titleSynonyms.map((x) => x)),
         "type": type,
         "source": source,
-        "episodes": episodes == null ? 0 : episodes,
+        "episodes": episodes,
         "status": status,
         "airing": airing,
         "aired": aired.toJson(),
         "duration": duration,
         "rating": rating,
-        "score": score == null ? null : score,
-        "scored_by": scoredBy == null ? null : scoredBy,
-        "rank": rank == null ? null : rank,
+        "score": score,
+        "scored_by": scoredBy,
+        "rank": rank,
         "popularity": popularity,
         "members": members,
         "favorites": favorites,
         "synopsis": synopsis,
-        "background": background == null ? null : background,
+        "background": background,
         "season": season,
         "year": year,
         "broadcast": broadcast.toJson(),
@@ -195,13 +189,13 @@ class Aired {
     });
 
     String from;
-    dynamic to;
+    String to;
     Prop prop;
     String string;
 
     factory Aired.fromJson(Map<String, dynamic> json) => Aired(
         from: json["from"],
-        to: json["to"],
+        to: json["to"] ?? "null",
         prop: Prop.fromJson(json["prop"]),
         string: json["string"],
     );
@@ -252,9 +246,9 @@ class From {
     );
 
     Map<String, dynamic> toJson() => {
-        "day": day == 0 ? null : day,
-        "month": month == 0 ? null : month,
-        "year": year == 0 ? null : year,
+        "day": day,
+        "month": month,
+        "year": year,
     };
 }
 
@@ -272,10 +266,10 @@ class Broadcast {
     String string;
 
     factory Broadcast.fromJson(Map<String, dynamic> json) => Broadcast(
-        day: json["day"],
-        time: json["time"],
-        timezone: json["timezone"],
-        string: json["string"],
+        day: json["day"] ?? "null",
+        time: json["time"] ?? "null",
+        timezone: json["timezone"] ?? "null",
+        string: json["string"] ?? "null",
     );
 
     Map<String, dynamic> toJson() => {
@@ -415,57 +409,5 @@ class Images {
         "medium_image_url": mediumImageUrl,
         "large_image_url": largeImageUrl,
         "maximum_image_url": maximumImageUrl,
-    };
-}
-
-class Pagination {
-    Pagination({
-        required this.lastVisiblePage,
-        required this.hasNextPage,
-        required this.currentPage,
-        required this.items,
-    });
-
-    int lastVisiblePage;
-    bool hasNextPage;
-    int currentPage;
-    Items items;
-
-    factory Pagination.fromJson(Map<String, dynamic> json) => Pagination(
-        lastVisiblePage: json["last_visible_page"],
-        hasNextPage: json["has_next_page"],
-        currentPage: json["current_page"],
-        items: Items.fromJson(json["items"]),
-    );
-
-    Map<String, dynamic> toJson() => {
-        "last_visible_page": lastVisiblePage,
-        "has_next_page": hasNextPage,
-        "current_page": currentPage,
-        "items": items.toJson(),
-    };
-}
-
-class Items {
-    Items({
-        required this.count,
-        required this.total,
-        required this.perPage,
-    });
-
-    int count;
-    int total;
-    int perPage;
-
-    factory Items.fromJson(Map<String, dynamic> json) => Items(
-        count: json["count"],
-        total: json["total"],
-        perPage: json["per_page"],
-    );
-
-    Map<String, dynamic> toJson() => {
-        "count": count,
-        "total": total,
-        "per_page": perPage,
     };
 }
