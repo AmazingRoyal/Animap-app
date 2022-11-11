@@ -160,12 +160,12 @@ class Datum {
         "approved": approved,
         "titles": List<dynamic>.from(titles.map((x) => x.toJson())),
         "title": title,
-        "title_english": titleEnglish ?? null,
+        "title_english": titleEnglish,
         "title_japanese": titleJapanese,
         "title_synonyms": List<dynamic>.from(titleSynonyms.map((x) => x)),
         "type": type,
         "source": source,
-        "episodes": episodes ?? null,
+        "episodes": episodes,
         "status": status,
         "airing": airing,
         "aired": aired.toJson(),
@@ -178,9 +178,9 @@ class Datum {
         "members": members,
         "favorites": favorites,
         "synopsis": synopsis,
-        "background": background ?? "null",
-        "season": season ?? "null",
-        "year": year ?? 0,
+        "background": background,
+        "season": season,
+        "year": year,
         "broadcast": broadcast.toJson(),
         "producers": List<dynamic>.from(producers.map((x) => x.toJson())),
         "licensors": List<dynamic>.from(licensors.map((x) => x.toJson())),
@@ -214,7 +214,7 @@ class Aired {
 
     Map<String, dynamic> toJson() => {
         "from": from,
-        "to": to ?? null,
+        "to": to,
         "prop": prop.toJson(),
         "string": string,
     };
@@ -258,9 +258,9 @@ class From {
     );
 
     Map<String, dynamic> toJson() => {
-        "day": day ?? null,
-        "month": month ?? null,
-        "year": year ?? null,
+        "day": day,
+        "month": month,
+        "year": year,
     };
 }
 
@@ -285,10 +285,10 @@ class Broadcast {
     );
 
     Map<String, dynamic> toJson() => {
-        "day": day ?? null,
-        "time": time ?? null,
-        "timezone": timezone ?? null,
-        "string": string ?? null,
+        "day": day,
+        "time": time,
+        "timezone": timezone,
+        "string": string,
     };
 }
 
@@ -385,9 +385,9 @@ class Trailer {
     );
 
     Map<String, dynamic> toJson() => {
-        "youtube_id": youtubeId ?? null,
-        "url": url ?? null,
-        "embed_url": embedUrl ?? null,
+        "youtube_id": youtubeId,
+        "url": url,
+        "embed_url": embedUrl,
         "images": images.toJson(),
     };
 }
@@ -416,11 +416,11 @@ class Images {
     );
 
     Map<String, dynamic> toJson() => {
-        "image_url": imageUrl ?? null,
-        "small_image_url": smallImageUrl ?? null,
-        "medium_image_url": mediumImageUrl ?? null,
-        "large_image_url": largeImageUrl ?? null,
-        "maximum_image_url": maximumImageUrl ?? null,
+        "image_url": imageUrl,
+        "small_image_url": smallImageUrl,
+        "medium_image_url": mediumImageUrl,
+        "large_image_url": largeImageUrl,
+        "maximum_image_url": maximumImageUrl,
     };
 }
 
@@ -514,7 +514,7 @@ class Link {
     );
 
     Map<String, dynamic> toJson() => {
-        "url": url ?? null,
+        "url": url,
         "label": label,
         "active": active,
     };

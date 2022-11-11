@@ -82,7 +82,7 @@ class Data {
     Aired aired;
     String duration;
     String rating;
-    double score;
+    num score;
     int scoredBy;
     int rank;
     int popularity;
@@ -102,31 +102,31 @@ class Data {
     List<Demographic> demographics;
 
     factory Data.fromJson(Map<String, dynamic> json) => Data(
-        malId: json["mal_id"],
-        url: json["url"],
+        malId: json["mal_id"] ?? 0,
+        url: json["url"] ?? "null",
         images: Map.from(json["images"]).map((k, v) => MapEntry<String, Img>(k, Img.fromJson(v))),
         trailer: Trailer.fromJson(json["trailer"]),
-        approved: json["approved"],
+        approved: json["approved"] ?? false,
         titles: List<Title>.from(json["titles"].map((x) => Title.fromJson(x))),
-        title: json["title"],
+        title: json["title"] ?? "null",
         titleEnglish: json["title_english"] ?? "null",
         titleJapanese: json["title_japanese"] ?? "null",
         titleSynonyms: List<String>.from(json["title_synonyms"].map((x) => x)),
-        type: json["type"],
-        source: json["source"],
+        type: json["type"] ?? "null",
+        source: json["source"] ?? "null",
         episodes: json["episodes"] ?? 0,
-        status: json["status"],
-        airing: json["airing"],
+        status: json["status"] ?? "null",
+        airing: json["airing"] ?? false,
         aired: Aired.fromJson(json["aired"]),
-        duration: json["duration"],
-        rating: json["rating"],
-        score: json["score"].toDouble(),
-        scoredBy: json["scored_by"],
-        rank: json["rank"],
-        popularity: json["popularity"],
-        members: json["members"],
-        favorites: json["favorites"],
-        synopsis: json["synopsis"],
+        duration: json["duration"] ?? "null",
+        rating: json["rating"] ?? "null",
+        score: json["score"] ?? 0.toDouble(),
+        scoredBy: json["scored_by"] ?? 0,
+        rank: json["rank"] ?? 0,
+        popularity: json["popularity"] ?? 0,
+        members: json["members"] ?? 0,
+        favorites: json["favorites"] ?? 0,
+        synopsis: json["synopsis"] ?? "null",
         background: json["background"],
         season: json["season"] ?? "null",
         year: json["year"] ?? 0,
@@ -366,9 +366,9 @@ class Trailer {
     Images images;
 
     factory Trailer.fromJson(Map<String, dynamic> json) => Trailer(
-        youtubeId: json["youtube_id"],
-        url: json["url"],
-        embedUrl: json["embed_url"],
+        youtubeId: json["youtube_id"] ?? "null",
+        url: json["url"] ?? "null",
+        embedUrl: json["embed_url"] ?? "null",
         images: Images.fromJson(json["images"]),
     );
 
@@ -396,11 +396,11 @@ class Images {
     String maximumImageUrl;
 
     factory Images.fromJson(Map<String, dynamic> json) => Images(
-        imageUrl: json["image_url"],
-        smallImageUrl: json["small_image_url"],
-        mediumImageUrl: json["medium_image_url"],
-        largeImageUrl: json["large_image_url"],
-        maximumImageUrl: json["maximum_image_url"],
+        imageUrl: json["image_url"] ?? "null",
+        smallImageUrl: json["small_image_url"] ?? "null",
+        mediumImageUrl: json["medium_image_url"] ?? "null",
+        largeImageUrl: json["large_image_url"] ?? "null",
+        maximumImageUrl: json["maximum_image_url"] ?? "null",
     );
 
     Map<String, dynamic> toJson() => {

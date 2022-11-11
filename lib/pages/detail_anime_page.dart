@@ -1,5 +1,10 @@
+// ignore_for_file: must_be_immutable
+
+import 'package:animap/models/anime_characters.dart';
 import 'package:animap/models/detail_anime.dart';
+import 'package:animap/pages/person_voice_page.dart';
 import 'package:flutter/material.dart';
+import 'package:sticky_headers/sticky_headers/widget.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../services/remote_service.dart';
 
@@ -7,9 +12,9 @@ import 'dart:developer' as log_dev;
 
 class DetailAnimePage extends StatefulWidget 
 {
-  const DetailAnimePage({super.key, required this.malId});
+  DetailAnimePage({super.key, required this.malId});
 
-  final String malId;
+  String malId="";
 
   @override
   State<DetailAnimePage> createState() => _DetailAnimePageState();
@@ -17,10 +22,14 @@ class DetailAnimePage extends StatefulWidget
 
 class _DetailAnimePageState extends State<DetailAnimePage> 
 { 
-
   DetailAnime? detailAnimes;
-  var isLoaded = false;
+  AnimeCharacters? animeCharacters;
+
+  var isLoadedDetailAnime = false;
+  var isLoadedAnimeCharacters = false;
   double gapSpace = 8.0;
+  bool checkDir = false;
+  
   List<Widget> listProducers = <Widget>[];
   List<Widget> listLisencors = <Widget>[];
   List<String> listGenres = <String>[];
@@ -31,12 +40,15 @@ class _DetailAnimePageState extends State<DetailAnimePage>
   {
     setState(() 
       {
-        isLoaded = false;
+        isLoadedDetailAnime = false;
+        isLoadedAnimeCharacters = false;
       });
-    getDetailAnime(widget.malId);
-    super.initState();
 
     // FETCH DATA FROM API
+    getDetailAnime(widget.malId);
+    getAnimeCharacters(widget.malId);
+
+    super.initState();
   }
 
   getDetailAnime(var malId) async
@@ -47,7 +59,21 @@ class _DetailAnimePageState extends State<DetailAnimePage>
     {
       setState(() 
       {
-        isLoaded = true;
+        isLoadedDetailAnime = true;
+      });
+    }
+  }
+
+  getAnimeCharacters(var malId) async
+  {
+    animeCharacters = await RemoteService(malId: malId).getAnimeCharacters();
+    log_dev.log(animeCharacters!.data![0].character.name.toString());
+
+    if (detailAnimes != null) 
+    {
+      setState(() 
+      {
+        isLoadedAnimeCharacters = true;
       });
     }
   }
@@ -61,44 +87,41 @@ class _DetailAnimePageState extends State<DetailAnimePage>
     listGenres.clear();
     listThemes.clear();
 
-    // CONVERT ARRAY TO TEXT LIST
-    // PRODUCERS
-    for (int i = 0; i < detailAnimes!.data!.producers.length; i++) 
+    for(int i=0; i<detailAnimes!.data!.producers.length;i++)
     {
       listProducers.add
       (
-        Text(detailAnimes!.data!.producers[i].name.toString()),
+        Text(detailAnimes!.data!.producers[i].name.toString())
       );
     }
-    // LISENCORS
-    for (int i = 0; i < detailAnimes!.data!.licensors.length; i++) 
+
+    for(int i=0; i<detailAnimes!.data!.licensors.length;i++)
     {
       listLisencors.add
       (
-        Text(detailAnimes!.data!.licensors[i].name.toString()),
+        Text(detailAnimes!.data!.licensors[i].name.toString())
       );
     }
-    // GENRES
-    for (int i = 0; i < detailAnimes!.data!.genres.length; i++) 
+
+    for(int i=0; i<detailAnimes!.data!.genres.length;i++)
     {
       listGenres.add
       (
         detailAnimes!.data!.genres[i].name.toString()
       );
     }
-    // THEMES
-    for (int i = 0; i < detailAnimes!.data!.themes.length; i++) 
+
+    for(int i=0; i<detailAnimes!.data!.themes.length;i++)
     {
       listThemes.add
       (
-        Text(detailAnimes!.data!.themes[i].name.toString()),
+        Text(detailAnimes!.data!.themes[i].name.toString())
       );
     }
 
     YoutubePlayerController controller = YoutubePlayerController(
         initialVideoId: detailAnimes!.data!.trailer.youtubeId,
         flags: const YoutubePlayerFlags(
-          controlsVisibleAtStart: true,
           autoPlay: false,
           mute: true,
         ),
@@ -106,430 +129,605 @@ class _DetailAnimePageState extends State<DetailAnimePage>
 
     return Scaffold
     (
+      appBar: AppBar
+      (
+        title: Text
+        (
+          "Anime Overview",
+          style: TextStyle
+          (
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.tertiary
+          ),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.black,
+      ),
       body: SafeArea
       (
-        child: SingleChildScrollView(
+        child: SingleChildScrollView
+        (
           child: Visibility
           (
-            visible: isLoaded,
+            visible: true,
             replacement: const Center
             (
               child: CircularProgressIndicator(),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column
-              (
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: 
-                [
-                  Container
-                  (
-                    decoration: BoxDecoration
-                    (
-                      borderRadius: const BorderRadius.all(Radius.circular(16)),
-                      boxShadow: [
-                        BoxShadow
-                        (
-                          color: Colors.grey.withOpacity(.7),
-                          spreadRadius: 5,
-                          blurRadius: 16,
-                          offset: const Offset(0, 3),
-                        )
-                      ]
-                    ),
-                    child: YoutubePlayer
-                    (
-                      controller: controller,
-                      showVideoProgressIndicator: true,
-
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ANIME HIGHLIGHT
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18.0),
-                    child: Row
-                    (
-                      children: [
-                        
-                        // ANIME IMAGE
-                        ClipRRect
-                        (
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image
-                          (
-                            image: NetworkImage(detailAnimes!.data!.images['jpg']!.smallImageUrl),
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-        
-                        const SizedBox(width: 12,),
-        
-                        // ANIME TITLE
-                        Flexible
-                        (
-                          child: Column
-                          (
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: 
-                            [
-                              Text
-                              (
-                                detailAnimes!.data!.title.toString(),
-                                style: const TextStyle
-                                (
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold
-                                ),
-                              ),
-        
-                              const SizedBox(height: 12),
+            child: Column
+            (
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: 
+              [
+                YoutubePlayer
+                (
+                  controller: controller,
+                  showVideoProgressIndicator: true,
+                  progressIndicatorColor: Theme.of(context).primaryColor,
+                ),
                     
-                              // ANIME EPISODE & DURATION
-                              Row
-                              (
-                                children: 
-                                [
-                                  Text
-                                  (
-                                    detailAnimes!.data!.episodes.toString(),
-                                    style: const TextStyle
-                                    (
-                                      fontSize: 13,
-                                      color: Colors.black54
-                                    ),
-                                  ),
-                                  const Text
-                                  (
-                                    " Episodes - ",
-                                    style: TextStyle
-                                    (
-                                      fontSize: 13,
-                                      color: Colors.black54
-                                    ),
-                                  ),
-                                  Text
-                                  (
-                                    detailAnimes!.data!.duration.toString(),
-                                    style: const TextStyle
-                                    (
-                                      fontSize: 13,
-                                      color: Colors.black54
-                                    ),
-                                  ),
-                                ],
-                              ),
-
-                              Text(
-                                listGenres.join(", "),
-                                style: const TextStyle
-                                    (
-                                      fontSize: 13,
-                                      color: Colors.black54
-                                    ),
-            
-                              )
-                            ],
-                          ),
-                        ),
-        
-                        const SizedBox(width: 8,),
-        
-                        // ANIME SCORE
-                        Column
-                        (
-                          children: [
-                            const Text
+                // ANIME HIGHLIGHT
+                StickyHeader
+                (
+                  header: Container
+                  (
+                    margin: EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration
+                  (
+                    color: Colors.grey.shade50,
+                    boxShadow: [
+                      BoxShadow
+                      (
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: .5,
+                        blurRadius: 16,
+                        offset: const Offset(0, 16),
+                      )
+                    ]
+                  ),
+                    // color: Colors.white,
+                    child: Padding
+                    (
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18.0),
+                      child: Row
+                      (
+                        children: [
+                          
+                          // ANIME IMAGE
+                          ClipRRect
+                          (
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image
                             (
-                              "Score",
-                              style: TextStyle
-                              (
-                                fontSize: 13,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.bold
-                              ),
+                              image: NetworkImage(detailAnimes!.data!.images['jpg']!.imageUrl),
+                              height: 100,
+                              fit: BoxFit.cover,
                             ),
-                            const SizedBox(height: 6),
-                            Container
+                          ),
+                      
+                          const SizedBox(width: 12,),
+                      
+                          // ANIME TITLE
+                          Flexible
+                          (
+                            child: Column
                             (
-                              decoration: BoxDecoration
-                              (
-                                color: const Color.fromRGBO(231, 111, 81, 1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Padding
-                              (
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                child: Text
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: 
+                              [
+                                Text
                                 (
-                                  detailAnimes!.data!.score.toString(),
+                                  detailAnimes!.data!.title.toString(),
                                   style: const TextStyle
                                   (
-                                    color: Colors.white,
-                                    fontSize: 16,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-        
-                  DefaultTabController
-                  (
-                    length: 3,
-                    child: Column
-                    (
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        const TabBar
-                        (
-                          labelColor: Colors.black,
-                          indicatorColor: Color.fromRGBO(231, 111, 81, 1),
-                          labelStyle: TextStyle
-                          (
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16
-                          ),
-                          indicatorWeight: 4,
-                          tabs: 
-                          [
-                          Tab(text: "Overview"),
-                          Tab(text: "Information"),
-                          Tab(text: "Review"),
-                        ]),
-                        
-                        SizedBox
-                        ( 
-                          //Add this to give height
-                          height: MediaQuery.of(context).size.height,
-                          child: TabBarView
-                          (
-                            children: [
-                            Container
-                            (
-                              child: Padding
-                              (
-                                padding: const EdgeInsets.symmetric(vertical :16),
-                                child: Text
+                      
+                                const SizedBox(height: 12),
+                      
+                                // ANIME EPISODE & DURATION
+                                Row
                                 (
-                                  detailAnimes!.data!.synopsis.toString(),
-                                  textAlign: TextAlign.justify,
+                                  children: 
+                                  [
+                                    Text
+                                    (
+                                      detailAnimes!.data!.episodes.toString(),
+                                      style: const TextStyle
+                                      (
+                                        fontSize: 13,
+                                        color: Colors.black54
+                                      ),
+                                    ),
+                                    const Text
+                                    (
+                                      " Episodes - ",
+                                      style: TextStyle
+                                      (
+                                        fontSize: 13,
+                                        color: Colors.black54
+                                      ),
+                                    ),
+                                    Text
+                                    (
+                                      detailAnimes!.data!.duration.toString(),
+                                      style: const TextStyle
+                                      (
+                                        fontSize: 13,
+                                        color: Colors.black54
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        
+                                const SizedBox(height: 4,),
+                        
+                                Text(
+                                  listGenres.join(", "),
                                   style: const TextStyle
                                   (
-                                    height: 1.5
+                                    fontSize: 13,
+                                    color: Colors.black54,
+                                  ),
+                          
+                                )
+                              ],
+                            ),
+                          ),
+                      
+                          const SizedBox(width: 8,),
+                      
+                          // ANIME SCORE
+                          Column
+                          (
+                            children: [
+                              const Text
+                              (
+                                "Score",
+                                style: TextStyle
+                                (
+                                  fontSize: 13,
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Container
+                              (
+                                decoration: BoxDecoration
+                                (
+                                  color: Theme.of(context).colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(20)
+                                ),
+                                child: Padding
+                                (
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                  child: Text
+                                  (
+                                    detailAnimes!.data!.score.toString(),
+                                    style: const TextStyle
+                                    (
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Container
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                content: DefaultTabController
+                (
+                  length: 3,
+                  child: Column
+                  (
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      TabBar
+                      (
+                        labelColor: Colors.black,
+                        indicatorColor: Theme.of(context).primaryColor,
+                        labelStyle: const TextStyle
+                        (
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16
+                        ),
+                        indicatorWeight: 4,
+                        tabs: 
+                        const [
+                        Tab(text: "Overview"),
+                        Tab(text: "Information"),
+                        Tab(text: "Characters"),
+                      ]),
+                      
+                      SizedBox
+                      ( 
+                        //Add this to give height
+                        height: MediaQuery.of(context).size.height,
+                        child: TabBarView
+                        (
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                          Container
+                          (
+                            child: Padding
                             (
-                              child: Padding
+                              padding: const EdgeInsets.symmetric(horizontal:24, vertical :16),
+                              child: Text
                               (
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                child: Column
+                                detailAnimes!.data!.synopsis.toString(),
+                                textAlign: TextAlign.justify,
+                                style: const TextStyle
                                 (
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // TYPE
-                                    Row(
-                                      children: [
-                                        const Text
-                                        (
-                                          "Type: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Text(detailAnimes!.data!.type.toString()),
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-
-                                    // SOURCE
-                                    Row(
-                                      children: [
-                                        const Text
-                                        (
-                                          "Source: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Text(detailAnimes!.data!.source.toString()),
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-
-                                    // STATUS
-                                    Row(
-                                      children: [
-                                        const Text
-                                        (
-                                          "Status: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Text(detailAnimes!.data!.status.toString()),
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-
-                                    // RATING
-                                    Row(
-                                      children: [
-                                        const Text
-                                        (
-                                          "Rating: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Text(detailAnimes!.data!.rating.toString()),
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-
-                                    // AIRED
-                                    Row(
-                                      children: [
-                                        const Text
-                                        (
-                                          "Aired: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Text(detailAnimes!.data!.aired.string.toString()),
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-
-                                    // BROADCAST
-                                    Row(
-                                      children: [
-                                        const Text
-                                        (
-                                          "Broadcast: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Text("${detailAnimes!.data!.season.toString()[0].toUpperCase()}${detailAnimes!.data!.season.toString().substring(1).toLowerCase()} ${detailAnimes!.data!.year.toString()}"),
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-
-                                    // PRODUCERS
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text
-                                        (
-                                          "Producers: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Column
-                                        (
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: listProducers
-                                        )
-                                        ,
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-                                    
-                                    // LISENCORS
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text
-                                        (
-                                          "Lisencors: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Column
-                                        (
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: listLisencors
-                                        )
-                                        ,
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-
-                                    // DEMOGRAPHIC
-                                    Row(
-                                      children: [
-                                        const Text
-                                        (
-                                          "Demographic: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Text(detailAnimes!.data!.demographics[0].name.toString()),
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-
-                                    // THEMES
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text
-                                        (
-                                          "Themes: ",
-                                          style: TextStyle
-                                          (
-                                            fontWeight: FontWeight.bold
-                                          ),
-                                        ),
-                                        Column
-                                        (
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: listThemes
-                                        )
-                                        ,
-                                      ],
-                                    ),
-                                    SizedBox(height: gapSpace),
-                                    
-                                  ],
+                                  height: 1.5
                                 ),
                               ),
                             ),
-                            Container(
-                              child: Text(detailAnimes!.data!.trailer.url.toString()),
+                          ),
+                          Container
+                          (
+                            child: Padding
+                            (
+                              padding: const EdgeInsets.symmetric(horizontal:24, vertical: 16),
+                              child: Column
+                              (
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // TYPE
+                                  Row(
+                                    children: [
+                                      const Text
+                                      (
+                                        "Type: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Text(detailAnimes!.data!.type.toString()),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                    
+                                  // SOURCE
+                                  Row(
+                                    children: [
+                                      const Text
+                                      (
+                                        "Source: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Text(detailAnimes!.data!.source.toString()),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                    
+                                  // STATUS
+                                  Row(
+                                    children: [
+                                      const Text
+                                      (
+                                        "Status: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Text(detailAnimes!.data!.status.toString()),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                    
+                                  // RATING
+                                  Row(
+                                    children: [
+                                      const Text
+                                      (
+                                        "Rating: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Text(detailAnimes!.data!.rating.toString()),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                    
+                                  // AIRED
+                                  Row(
+                                    children: [
+                                      const Text
+                                      (
+                                        "Aired: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Text(detailAnimes!.data!.aired.string.toString()),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                    
+                                  // BROADCAST
+                                  Row(
+                                    children: [
+                                      const Text
+                                      (
+                                        "Broadcast: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Text("${detailAnimes!.data!.season.toString()[0].toUpperCase()}${detailAnimes!.data!.season.toString().substring(1).toLowerCase()} ${detailAnimes!.data!.year.toString()}"),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                    
+                                  // PRODUCERS
+                                  Row
+                                  (
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text
+                                      (
+                                        "Producers: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Column
+                                      (
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: listProducers
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                    
+                                  // LISENCORS
+                                  Row
+                                  (
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text
+                                      (
+                                        "Lisencors: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Column
+                                      (
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: listLisencors
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                    
+                                  // THEMES
+                                  Row
+                                  (
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text
+                                      (
+                                        "Themes: ",
+                                        style: TextStyle
+                                        (
+                                          fontWeight: FontWeight.bold
+                                        ),
+                                      ),
+                                      Column
+                                      (
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: listThemes
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: gapSpace),
+                                ],
+                              ),
                             ),
-                          ]),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                          ),
+                          Container
+                          (
+                            child: NotificationListener<OverscrollIndicatorNotification>
+                            (
+                              onNotification: (overScroll)
+                              {
+                                overScroll.disallowIndicator();
+                                return false;
+                              },
+                              child: ListView.builder
+                              (
+                                // physics: const ClampingScrollPhysics(),
+                                itemCount: animeCharacters!.data!.length,
+                                itemBuilder: (context, index) 
+                                {
+                                  var japan = 0;
+                            
+                                  for (int i=0 ; i<animeCharacters!.data![index].voiceActors.length ; i++) 
+                                  {
+                                    if (animeCharacters!.data![index].voiceActors[i].language.toString() == "Japanese"){
+                                      japan = i;
+                                      break;
+                                    }else if (i == animeCharacters!.data![index].voiceActors.length -1){
+                                      japan = i;
+                                    }
+                                  }
+                            
+                                  return Padding
+                                  (
+                                    padding: const EdgeInsets.symmetric(horizontal:24,vertical: 12),
+                                    child: Row
+                                    (
+                                      children: 
+                                      [
+                                        Container(
+                                          decoration: BoxDecoration
+                                          (
+                                            borderRadius: const BorderRadius.all(Radius.circular(16)),
+                                            boxShadow: 
+                                            [
+                                              BoxShadow
+                                              (
+                                                color: Colors.grey.withOpacity(0.3),
+                                                spreadRadius: 5,
+                                                blurRadius: 16,
+                                                offset: const Offset(0, 3),
+                                              )
+                                            ]
+                                          ),
+                                          child: ClipRRect
+                                          (
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image
+                                            (
+                                              image: NetworkImage(animeCharacters!.data![index].character.images['jpg']!.imageUrl),
+                                              height: 100,
+                                              width: 70,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        
+                                        const SizedBox(width: 12),
+                            
+                                        Expanded
+                                        (
+                                          child: Column
+                                          (
+                                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column
+                                              (
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: 
+                                                [
+                                                  Text
+                                                  (
+                                                    animeCharacters!.data![index].character.name.toString(),
+                                                    style: const TextStyle
+                                                    (
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.bold
+                                                    ),
+                                                  ),
+                                                  
+                                                  Text
+                                                  (
+                                                    animeCharacters!.data![index].role.toString(),
+                                                    style: TextStyle
+                                                    (
+                                                      fontWeight: animeCharacters!.data![index].role=="Main" ? FontWeight.bold : FontWeight.normal,
+                                                      color: animeCharacters!.data![index].role=="Main" ? Theme.of(context).primaryColor : Colors.black
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Column
+                                              (
+                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                                children: 
+                                                [
+                                                  Text
+                                                  (
+                                                    animeCharacters!.data![index].voiceActors[japan].person.name.toString(),
+                                                    style: const TextStyle
+                                                    (
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.bold
+                                                    ),
+                                                  ),
+                                                  Text(animeCharacters!.data![index].voiceActors[japan].language.toString()),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        
+                                        const SizedBox(width: 12),
+                            
+                                        InkWell(
+                                          onTap: () {
+                                            Navigator.push
+                                            (
+                                              context,
+                                              MaterialPageRoute
+                                              (
+                                                builder: (context) => PersonVoicePage
+                                                (
+                                                  malId: animeCharacters!.data![index].voiceActors[japan].person.malId.toString(),
+                                                  imageUrl: animeCharacters!.data![index].voiceActors[japan].person.images.jpg.imageUrl.toString(),
+                                                  name: animeCharacters!.data![index].voiceActors[japan].person.name.toString(),
+                                                  language: animeCharacters!.data![index].voiceActors[japan].language.toString(),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            decoration: BoxDecoration
+                                            (
+                                              borderRadius: const BorderRadius.all(Radius.circular(16)),
+                                              boxShadow: 
+                                              [
+                                                BoxShadow
+                                                (
+                                                  color: Colors.grey.withOpacity(0.3),
+                                                  spreadRadius: 5,
+                                                  blurRadius: 16,
+                                                  offset: const Offset(0, 2),
+                                                )
+                                              ]
+                                            ),
+                                            child: ClipRRect
+                                            (
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: Image
+                                              (
+                                                image: NetworkImage(animeCharacters!.data![index].voiceActors[japan].person.images.jpg.imageUrl),
+                                                height: 100,
+                                                width: 70,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }
+                              ),
+                            )
+                          ),
+                        ]),
+                      ),
+                    ],
+                  ),
+                )
+              
+                ),
+                  
+              ],
             ),
           ),
         ),
