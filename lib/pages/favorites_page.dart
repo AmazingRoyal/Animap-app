@@ -7,118 +7,244 @@ class FavoritesPage extends StatefulWidget {
   _FavoritesPageState createState() => _FavoritesPageState();
 }
 
-final nameController = TextEditingController();
-final ageController = TextEditingController();
-final birthdayController = TextEditingController();
+final mal_idController = TextEditingController();
+final titleController = TextEditingController();
+final imageController = TextEditingController();
+final scoreController = TextEditingController();
+final typeController = TextEditingController();
+final episodeController = TextEditingController();
+final durationController = TextEditingController();
 
 class _FavoritesPageState extends State<FavoritesPage> 
 {
+   late final String documentId;
   
   @override
   Widget build(BuildContext context) 
   {
     return Scaffold
     (
-      body: SafeArea
+      body: StreamBuilder
       (
-        child: Container
-        (
-          padding: EdgeInsets.all(24),
-          child: ListView
-          (
-            children: 
-            <Widget> [
-              TextField
+        stream: readFavorites(),
+        builder: (context, snapshot)
+        {
+          if (snapshot.hasData)
+          {
+            final favorites = snapshot.data!;
+            return SafeArea
+            (
+              child: 
+              Column
               (
-                controller: nameController,
-                decoration: InputDecoration
-                (
-                  label: Text("Name")
-                ),
-              ),
-              TextField
-              (
-                controller: ageController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration
-                (
-                  label: Text("Age")
-                ),
-              ),
-              TextField
-              (
-                controller: birthdayController,
-                decoration: InputDecoration
-                (
-                  label: Text("Birthday")
-                ),
-              ),
-
-              ElevatedButton
-              (
-                onPressed: () 
-                {
-                  final name = nameController.text;
-                  final age = int.parse(ageController.text);
-                  final birthday = birthdayController.text;
-                  
-                  // createUser(name: name, age: age, birthday: birthday);
-
-                  Navigator.pop(context);
-                },
-                child: Text("Submit")
-              )
-            ],
-          ),
-        ) 
-      ),
+                children: [
+                  Expanded(
+                    child: Container
+                    (
+                      padding: EdgeInsets.all(24),
+                      child: ListView
+                      (
+                        children: 
+                        <Widget> [
+                          TextField
+                          (
+                            controller: mal_idController,
+                            decoration: InputDecoration
+                            (
+                              label: Text("mal_id")
+                            ),
+                          ),
+                          TextField
+                          (
+                            controller:titleController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration
+                            (
+                              label: Text("title")
+                            ),
+                          ),
+                          TextField
+                          (
+                            controller: imageController,
+                            decoration: InputDecoration
+                            (
+                              label: Text("image")
+                            ),
+                          ),
+                          TextField
+                          (
+                            controller: scoreController,
+                            decoration: InputDecoration
+                            (
+                              label: Text("score")
+                            ),
+                          ),
+                          TextField
+                          (
+                            controller: typeController,
+                            decoration: InputDecoration
+                            (
+                              label: Text("type")
+                            ),
+                          ),
+                          TextField
+                          (
+                            controller: episodeController,
+                            decoration: InputDecoration
+                            (
+                              label: Text("episode")
+                            ),
+                          ),
+                          TextField
+                          (
+                            controller: durationController,
+                            decoration: InputDecoration
+                            (
+                              label: Text("duration")
+                            ),
+                          ),
+                            
+                          ElevatedButton
+                          (
+                            onPressed: () 
+                            {
+                              final mal_id = int.parse(mal_idController.text);
+                              final title = titleController.text;
+                              final image = imageController.text;
+                              final score = double.parse(scoreController.text);
+                              final type = typeController.text;
+                              final episode = int.parse(episodeController.text);
+                              final duration = durationController.text;
+                              
+                              createFavorite
+                              (
+                                mal_id: mal_id, 
+                                title: title,
+                                image: image, 
+                                score: score,
+                                type: type, 
+                                episode: episode,
+                                duration: duration, 
+                              );
+                            },
+                            child: Text("Submit")
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView
+                    (
+                      children: favorites.map(buildFavorite).toList(),
+                    ),
+                  )
+                ],
+              ) 
+            );
+          }else if(snapshot.hasError) {
+            return Text("Error");
+          }else{
+            return Center(child: CircularProgressIndicator(),);
+          }
+        },
+      )
     );
+
   }
+    Widget buildFavorite(Favorites favorites) => ListTile
+    (
+      leading: CircleAvatar(child: Text("${favorites.episode}"),),
+      title: Text(favorites.title),
+      subtitle: Text(favorites.type),
+      onTap: () {
+        FirebaseFirestore.instance.collection("favorites").doc(userId).collection("data").doc(favorites.mal_id.toString()).delete().then(
+          (doc) => print("Document deleted"),
+          onError: (e) => print("Error updating document $e"),
+        );
+      },
+    );
 
-  // Stream <List<User>> readUsers() => FirebaseFirestore.instance
-  // .collection("users")
-  // .snapshots()
-  // .map((snapshot) => 
-  //     snapshot.docs.map((doc) => User.fromJson(doc.data())).toList());
+  final userId = FirebaseAuth.instance.currentUser!.uid;
 
-  //   Future createUser({required String name, required int age, required String birthday}) async 
-  //   {
-  //     final docUser = FirebaseFirestore.instance.collection("users").doc();
+  Stream <List<Favorites>> readFavorites() => FirebaseFirestore.instance
+  .collection("favorites").doc(userId).collection("data")
+  .snapshots()
+  .map((snapshot) => 
+      snapshot.docs.map((doc) => Favorites.fromJson(doc.data())).toList());
 
-  //     final user = MyUser(
-  //       id: docUser.id,
-  //       name: name,
-  //       age: age,
-  //       birthday: DateTime(2000, 5, 2)
-  //     );
+  Future createFavorite(
+    {
+      required int mal_id, 
+      required String title,
+      required String image,
+      required double score,
+      required String type,
+      required int episode,
+      required String duration,
+    }
+  ) async 
+  {
+    
+    final docFavorite = FirebaseFirestore.instance.collection("favorites").doc(userId).collection("data").doc(mal_id.toString());
 
-  //     final json = user.toJson();
+    final favorite = Favorites(
+      mal_id: mal_id,
+      title: title,
+      image: image,
+      score: score,
+      type: type,
+      episode: episode,
+      duration: duration,
+    );
 
-  //     await docUser.set(json);
-  //   }
+    final json = favorite.toJson();
+    await docFavorite.set(json);
+  }
 }
 
-class MyUser 
+class Favorites 
 {
-  String id;
-  final String name;
-  final int age;
-  final DateTime birthday;
+  final int mal_id;
+  final String title;
+  final String image;
+  final double score;
+  final String type;
+  final int episode;
+  final String duration;
 
-  MyUser(
+  Favorites(
     {
-      this.id = '',
-      required this.name,
-      required this.age,
-      required this.birthday
+      required this.mal_id,
+      required this.title,
+      required this.image,
+      required this.score,
+      required this.type,
+      required this.episode,
+      required this.duration,
     }
   );
 
   Map <String, dynamic> toJson() => 
   {
-    "id": id,
-    "name": name,
-    "age": age,
-    "birthday": birthday
+    "mal_id": mal_id,
+    "title": title,
+    "image": image,
+    "score": score,
+    "type": type,
+    "episode": episode,
+    "duration": duration,
   };
+
+  static Favorites fromJson(Map <String, dynamic> json) => Favorites
+  (
+    mal_id: json['mal_id'],
+    title: json['title'],
+    image: json['image'],
+    score: json['score'],
+    type: json['type'],
+    episode: json['episode'],
+    duration: json['duration'],
+  );
+
 }

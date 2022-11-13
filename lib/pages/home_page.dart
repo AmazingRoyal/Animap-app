@@ -138,7 +138,7 @@ class _HomePageState extends State<HomePage>
                 // UPCOMING ANIME CONTENT
                 SizedBox
                 (
-                  height: 320,
+                  height: 350,
                   child: Visibility
                   (
                     visible: isLoadedSeasonNow,
@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage>
                         {
                           return Padding
                           (
-                            padding: EdgeInsets.fromLTRB(index==0?24:12, 22, 12, 22),
+                            padding: EdgeInsets.fromLTRB(index==0?24:8, 22, 8, 22),
                             child: InkWell
                             (
                               onTap: () 
@@ -184,32 +184,15 @@ class _HomePageState extends State<HomePage>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget> 
                                   [
-                                    Container
+                                    ClipRRect
                                     (
-                                      decoration: BoxDecoration
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image
                                       (
-                                        borderRadius: const BorderRadius.all(Radius.circular(16)),
-                                        boxShadow: 
-                                        [
-                                          BoxShadow
-                                          (
-                                            color: Colors.grey.withOpacity(0.3),
-                                            spreadRadius: 5,
-                                            blurRadius: 16,
-                                            offset: const Offset(0, 3),
-                                          )
-                                        ]
-                                      ),
-                                      child: ClipRRect
-                                      (
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: Image
-                                        (
-                                          image: NetworkImage(upcomingAnime!.data![index].images['jpg']!.imageUrl),
-                                          height: 180,
-                                          width: 140,
-                                          fit: BoxFit.cover,
-                                        ),
+                                        image: NetworkImage(upcomingAnime!.data![index].images['jpg']!.imageUrl),
+                                        height: 210,
+                                        width: 140,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                 
@@ -301,7 +284,7 @@ class _HomePageState extends State<HomePage>
                 // SEASON NOW CONTENT
                 SizedBox
                 (
-                  height: 340,
+                  height: 370,
                   child: Visibility
                   (
                     visible: isLoadedSeasonNow,
@@ -325,7 +308,7 @@ class _HomePageState extends State<HomePage>
                         {
                           return Padding
                           (
-                            padding: EdgeInsets.fromLTRB(index==0?24:12, 22, 12, 22),
+                            padding: EdgeInsets.fromLTRB(index==0?24:8, 22, 8, 22),
                             child: InkWell
                             (
                               onTap: () 
@@ -347,32 +330,15 @@ class _HomePageState extends State<HomePage>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget> 
                                   [
-                                    Container
+                                    ClipRRect
                                     (
-                                      decoration: BoxDecoration
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image
                                       (
-                                        borderRadius: const BorderRadius.all(Radius.circular(16)),
-                                        boxShadow: 
-                                        [
-                                          BoxShadow
-                                          (
-                                            color: Colors.grey.withOpacity(0.3),
-                                            spreadRadius: 5,
-                                            blurRadius: 16,
-                                            offset: const Offset(0, 3),
-                                          )
-                                        ]
-                                      ),
-                                      child: ClipRRect
-                                      (
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: Image
-                                        (
-                                          image: NetworkImage(seasonNows!.data[index].images['jpg']!.imageUrl),
-                                          height: 180,
-                                          width: 140,
-                                          fit: BoxFit.cover,
-                                        ),
+                                        image: NetworkImage(seasonNows!.data[index].images['jpg']!.imageUrl),
+                                        width: 140,
+                                        height: 210,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                 
@@ -501,7 +467,7 @@ class _HomePageState extends State<HomePage>
                 // TOP ANIME CONTENT
                 SizedBox
                 (
-                  height: 340,
+                  height: 370,
                   child: Visibility
                   (
                     visible: isLoadedTopAnime,
@@ -525,7 +491,7 @@ class _HomePageState extends State<HomePage>
                         {
                           return Padding
                           (
-                            padding: EdgeInsets.fromLTRB(index==0?24:12, 22, 12, 22),
+                            padding: EdgeInsets.fromLTRB(index==0?24:8, 22, 8, 22),
                             child: InkWell
                             (
                               onTap: () 
@@ -547,34 +513,15 @@ class _HomePageState extends State<HomePage>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget> 
                                   [
-                                    Container
+                                    ClipRRect
                                     (
-                                      decoration: BoxDecoration
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image
                                       (
-                                        borderRadius: const BorderRadius.all(Radius.circular(16)),
-                                        boxShadow: 
-                                        [
-                                          BoxShadow
-                                          (
-                                            color: Colors.grey.withOpacity(0.3),
-                                            spreadRadius: 5,
-                                            blurRadius: 16,
-                                            offset: const Offset(0, 3),
-                                          )
-                                        ]
-                                      ),
-                    
-                                      // TOP ANIME CONTENT - IMAGE
-                                      child: ClipRRect
-                                      (
-                                        borderRadius: BorderRadius.circular(16),
-                                        child: Image
-                                        (
-                                          image: NetworkImage(topAnimes!.data![index].images['jpg']!.imageUrl),
-                                          height: 180,
-                                          width: 140,
-                                          fit: BoxFit.cover,
-                                        ),
+                                        image: NetworkImage(topAnimes!.data![index].images['jpg']!.imageUrl),
+                                        height: 210,
+                                        width: 140,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                 
